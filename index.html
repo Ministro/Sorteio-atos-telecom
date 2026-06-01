@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sorteio Atos Telecom</title>
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: radial-gradient(circle at top, #037457, #020812 65%);
+        color: white;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      .container {
+        max-width: 1100px;
+        margin: auto;
+        padding: 25px;
+        text-align: center;
+      }
+
+      .logo {
+        width: 180px;
+        margin-top: 15px;
+      }
+
+      h1 {
+        font-size: 48px;
+        margin: 15px 0 5px;
+        color: #cadf0c;
+        text-shadow: 0 0 20px #09862f;
+      }
+
+      .sub {
+        font-size: 22px;
+        letter-spacing: 4px;
+        margin-bottom: 25px;
+      }
+
+      .card {
+        background: rgba(0, 10, 25, 0.85);
+        border: 2px solid #0a6607;
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 0 25px #00cfff55;
+      }
+
+      input[type="file"] {
+        padding: 12px;
+        background: white;
+        color: black;
+        border-radius: 10px;
+        margin-bottom: 20px;
+      }
+
+      button {
+        border: none;
+        border-radius: 12px;
+        padding: 15px 30px;
+        margin: 10px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        background: linear-gradient(135deg, #45c513, #658b32);
+        color: white;
+        box-shadow: 0 0 15px #3cff00;
+      }
+
+      button:hover {
+        transform: scale(1.05);
+      }
+
+      #contador {
+        font-size: 90px;
+        font-weight: bold;
+        margin: 25px 0;
+        color: #fff;
+        text-shadow: 0 0 25px #0c8f34;
+      }
+
+      #nomeSorteado {
+        font-size: 46px;
+        font-weight: bold;
+        margin: 25px auto;
+        min-height: 80px;
+        color: #ffffff;
+        text-shadow: 0 0 20px #00cfff;
+        animation: brilho 1s infinite alternate;
+      }
+
+      @keyframes brilho {
+        from {
+          transform: scale(1);
+          opacity: 0.8;
+        }
+        to {
+          transform: scale(1.05);
+          opacity: 1;
+        }
+      }
+
+      .lista {
+        margin-top: 25px;
+        max-height: 250px;
+        overflow-y: auto;
+        text-align: left;
+        background: rgba(255, 255, 255, 0.08);
+        padding: 15px;
+        border-radius: 12px;
+      }
+
+      .nome-item {
+        padding: 6px;
+        border-bottom: 1px solid #ffffff22;
+      }
+
+      .sorteado {
+        color: #1d970d;
+        font-weight: bold;
+      }
+
+      .confete {
+        position: fixed;
+        top: -20px;
+        width: 10px;
+        height: 10px;
+        background: #10a71d;
+        animation: cair 3s linear forwards;
+      }
+
+      @keyframes cair {
+        to {
+          transform: translateY(110vh) rotate(720deg);
+          opacity: 0;
+        }
+      }
+
+      footer {
+        margin-top: 25px;
+        font-size: 14px;
+        color: #aaa;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <img
+        class="logo"
+        src="https://i.supaimg.com/12820c3b-da0c-4cbf-86c0-12ae6f6217c6.png"
+      />
+
+      <h1>SORTEIO ATOS TELECOM</h1>
+      <div class="sub">BOA SORTE</div>
+
+      <div class="card">
+        <input type="file" id="arquivoTxt" accept=".txt" />
+
+        <br />
+
+        <button onclick="carregarNomes()">Carregar Nomes</button>
+        <button onclick="iniciarSorteio()">Sortear Agora</button>
+        <button onclick="limparSorteio()">Limpar</button>
+
+        <div id="contador">--</div>
+
+        <div id="nomeSorteado">Carregue o arquivo TXT</div>
+
+        <h3>Lista de nomes</h3>
+        <div class="lista" id="listaNomes"></div>
+      </div>
+
+      <footer>ATOS TELECOM - Conectando você ao que importa</footer>
+    </div>
+
+    <script>
+      let nomes = [];
+      let sorteados = [];
+
+      function carregarNomes() {
+        const arquivo = document.getElementById("arquivoTxt").files[0];
+
+        if (!arquivo) {
+          alert("Selecione um arquivo .txt com os nomes.");
+          return;
+        }
+
+        const leitor = new FileReader();
+
+        leitor.onload = function (e) {
+          nomes = e.target.result
+            .split(/\r?\n/)
+            .map((nome) => nome.trim())
+            .filter((nome) => nome.length > 0);
+
+          sorteados = [];
+
+          mostrarLista();
+
+          document.getElementById("nomeSorteado").innerText =
+            nomes.length + " nomes carregados";
+          document.getElementById("contador").innerText = "--";
+        };
+
+        leitor.readAsText(arquivo, "UTF-8");
+      }
+
+      function mostrarLista() {
+        const lista = document.getElementById("listaNomes");
+        lista.innerHTML = "";
+
+        nomes.forEach((nome) => {
+          const div = document.createElement("div");
+          div.className = "nome-item";
+          div.innerText = nome;
+          lista.appendChild(div);
+        });
+      }
+
+      function iniciarSorteio() {
+        if (nomes.length === 0) {
+          alert("Carregue os nomes primeiro.");
+          return;
+        }
+
+        let disponiveis = nomes.filter((nome) => !sorteados.includes(nome));
+
+        if (disponiveis.length === 0) {
+          alert("Todos os nomes já foram sorteados.");
+          return;
+        }
+
+        let tempo = 5;
+        const contador = document.getElementById("contador");
+        const nomeSorteado = document.getElementById("nomeSorteado");
+
+        contador.innerText = tempo;
+        nomeSorteado.innerText = "Sorteando...";
+
+        let animacaoNomes = setInterval(() => {
+          const aleatorio =
+            disponiveis[Math.floor(Math.random() * disponiveis.length)];
+          nomeSorteado.innerText = aleatorio;
+        }, 100);
+
+        let intervalo = setInterval(() => {
+          tempo--;
+          contador.innerText = tempo;
+
+          if (tempo === 0) {
+            clearInterval(intervalo);
+            clearInterval(animacaoNomes);
+
+            const vencedor =
+              disponiveis[Math.floor(Math.random() * disponiveis.length)];
+
+            sorteados.push(vencedor);
+
+            contador.innerText = "🎉";
+            nomeSorteado.innerText = vencedor;
+
+            marcarSorteado(vencedor);
+            soltarConfetes();
+          }
+        }, 1000);
+      }
+
+      function marcarSorteado(nome) {
+        const itens = document.querySelectorAll(".nome-item");
+
+        itens.forEach((item) => {
+          if (item.innerText === nome) {
+            item.classList.add("sorteado");
+            item.innerText = "🎉 " + nome;
+          }
+        });
+      }
+
+      function soltarConfetes() {
+        for (let i = 0; i < 80; i++) {
+          const confete = document.createElement("div");
+          confete.className = "confete";
+          confete.style.left = Math.random() * 100 + "vw";
+          confete.style.background = ["#00cfff", "#ffffff", "#0077ff"][
+            Math.floor(Math.random() * 3)
+          ];
+          confete.style.animationDuration = Math.random() * 2 + 2 + "s";
+          document.body.appendChild(confete);
+
+          setTimeout(() => confete.remove(), 4000);
+        }
+      }
+
+      function limparSorteio() {
+        sorteados = [];
+        document.getElementById("contador").innerText = "--";
+        document.getElementById("nomeSorteado").innerText =
+          "Sorteio reiniciado";
+        mostrarLista();
+      }
+    </script>
+  </body>
+</html>
